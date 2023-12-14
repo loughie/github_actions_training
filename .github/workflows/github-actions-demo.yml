@@ -8,6 +8,11 @@ on:
   schedule:
     - cron: '15 6 * * 0'
   workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Environment to deploy to'
+        type: environment
+        required: true
 jobs:
   Build:
     runs-on: ubuntu-latest
@@ -15,10 +20,51 @@ jobs:
       - run: |
           echo "🎉 The job was triggered by event: ${{ github.event_name }}"
           echo "🔎 The name of your branch is ${{ github.ref }} and your repository is ."
-
       - uses: actions/checkout@v3.3.0
-
       - name: List files in the repository
         run: |
           echo "The repository ${{ github.repository }} contains the following files:"
           tree
+  Test:
+    needs: Build
+    environment: Test
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Testing..."
+
+  Load-Test:
+    needs: Build
+    environment: Load-Test
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Testing..."
+          sleep 15
+
+  Production:
+    needs: [Test, Load-Test]
+    environment: 
+      name: Production
+      url: https://writeabout.net
+    if: github.event.inputs.environment == 'Production'
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          echo "Step 1 - deploying"
+          sleep: 10
+      - run: |
+          echo "Step 2 - deploying"
+          sleep: 10
+      - run: |
+          echo "Step 3 - deploying"
+          sleep: 10
+      - run: |
+          echo "Step 4 - deploying"
+          sleep: 10
+      - run: |
+          echo "Step 5 - deploying"
+          sleep: 10
+
+          
+          
+          
